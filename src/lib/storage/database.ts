@@ -357,9 +357,10 @@ export async function createEntity<T extends { id: EntityId; createdAt: ISODateS
   const id = entity.id || Crypto.randomUUID() as EntityId;
   const now = new Date().toISOString() as ISODateString;
   
-  const columns = ['id', 'created_at', 'updated_at', ...Object.keys(entity).filter(k => k !== 'id')];
+  const entityKeys = Object.keys(entity).filter(k => k !== 'id');
+  const columns = ['id', 'created_at', 'updated_at', ...entityKeys.map(snakeCase)];
   const placeholders = columns.map(() => '?').join(', ');
-  const values = [id, now, now, ...Object.values(entity).filter((_, i) => Object.keys(entity)[i] !== 'id')];
+  const values = [id, now, now, ...entityKeys.map(k => entity[k as keyof typeof entity])];
   
   await db.runAsync(
     `INSERT INTO ${table} (${columns.join(', ')}) VALUES (${placeholders})`,
