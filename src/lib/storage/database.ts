@@ -357,7 +357,8 @@ export async function createEntity<T extends { id: EntityId; createdAt: ISODateS
   const id = entity.id || Crypto.randomUUID() as EntityId;
   const now = new Date().toISOString() as ISODateString;
   
-  const entityKeys = Object.keys(entity).filter(k => k !== 'id');
+  // Only persist business fields here. createdAt/updatedAt are managed by this repository.
+  const entityKeys = Object.keys(entity).filter(k => k !== 'id' && k !== 'createdAt' && k !== 'updatedAt');
   const columns = ['id', 'created_at', 'updated_at', ...entityKeys.map(snakeCase)];
   const placeholders = columns.map(() => '?').join(', ');
   const values = [id, now, now, ...entityKeys.map(k => entity[k as keyof typeof entity])];
@@ -426,8 +427,10 @@ export async function getAllEntities<T>(
   params: any[] = []
 ): Promise<T[]> {
   const db = await getDatabase();
-  const where = whereClause ? `WHERE ${whereClause}` : '';
-  const rows = await db.getAllAsync(`SELECT * FROM ${table} ${where} AND deleted_at IS NULL ORDER BY created_at DESC`, params);
+  const conditions = ['deleted_at IS NULL'];
+  if (whereClause) conditions.push(`(${whereClause})`);
+  const where = `WHERE ${conditions.join(' AND ')}`;
+  const rows = await db.getAllAsync(`SELECT * FROM ${table} ${where} ORDER BY created_at DESC`, params);
   return rows.map(mapper);
 }
 
