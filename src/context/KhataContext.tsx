@@ -5,7 +5,7 @@ import { getActiveAccounts, createAccount } from '@/lib/storage/repositories/acc
 import { createTransaction, getRecentTransactions, createTransfer, deleteTransaction } from '@/lib/storage/repositories/transactions';
 import { getAllCategories } from '@/lib/storage/repositories/categories';
 import { createBudget, getActiveBudgets } from '@/lib/storage/repositories/budgets';
-import { createGoal, getAllGoals, updateGoalAmount } from '@/lib/storage/repositories/goals';
+import { createGoal, getAllGoals, addGoalContribution } from '@/lib/storage/repositories/goals';
 import { getAllBills } from '@/lib/storage/repositories/bills';
 import { getActiveDebts } from '@/lib/storage/repositories/debts';
 import { getAllInvestments } from '@/lib/storage/repositories/investments';
@@ -69,7 +69,7 @@ export function KhataProvider({ children }: { children: React.ReactNode }) {
     addTransfer: data => mutate(async () => { await createTransfer(data); }),
     removeTransaction: id => mutate(async () => { await deleteTransaction(id); }),
     addGoal: data => mutate(async () => { await createGoal(data); }),
-    contributeToGoal: (id, amount) => mutate(async () => { await updateGoalAmount(id, amount); }),
+    contributeToGoal: (id, amount) => mutate(async () => { const account = accounts[0]; if (!account) throw new Error('Add an account before contributing to a goal.'); await addGoalContribution({ goalId:id, amount, currency:account.currency, accountId:account.id, date:new Date().toISOString() }); }),
     addBudget: data => mutate(async () => { await createBudget(data); }),
     setSetting: updates => mutate(async () => { await updateSettings(updates); }),
   }), [ready, busy, accounts, transactions, categories, budgets, goals, bills, debts, investments, settings, refresh, mutate]);
