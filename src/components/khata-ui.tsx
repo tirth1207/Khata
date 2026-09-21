@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, useColorScheme, View, type TextInputProps, type ViewStyle } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View, type TextInputProps, type ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export type KhataPalette = {
@@ -57,10 +57,10 @@ function buildStyles(p: KhataPalette, topInset = 0, bottomInset = 0) {
 }
 
 export function useKhataTheme() {
-  const scheme = useColorScheme();
   const insets = useSafeAreaInsets();
-  const colors = scheme === 'dark' ? DARK : LIGHT;
-  return { palette:colors, styles:buildStyles(colors, insets.top, insets.bottom), isDark:scheme === 'dark' };
+  // Khata is intentionally light-only. Keep the palette independent of the
+  // device's system appearance so every screen stays visually consistent.
+  return { palette:LIGHT, styles:buildStyles(LIGHT, insets.top, insets.bottom), isDark:false };
 }
 
 export function Card({children,style}:{children:React.ReactNode;style?:ViewStyle}) {
