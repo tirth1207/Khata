@@ -6,34 +6,34 @@ Build a premium local-first personal finance management application with offline
 ## Phases
 
 ### Phase 1 — Foundation (Week 1-2)
-- [ ] Expo SDK 57 project with TypeScript strict mode
-- [ ] Expo Router with typed routes
-- [ ] Design system with semantic color tokens (light/dark)
-- [ ] Storage layer: SQLite (expo-sqlite) for structured data, SecureStore for secrets, FileSystem for receipts
+- [x] Expo SDK 57 project with TypeScript strict mode
+- [x] Expo Router with file-based routes
+- [x] Design system with semantic color tokens (light/dark)
+- [x] Storage layer: SQLite (expo-sqlite) for structured data, SecureStore for secrets, FileSystem for receipts
 - [ ] Security layer: PIN authentication, biometric support
-- [ ] Repository pattern for data access
-- [ ] Service layer for financial calculations
-- [ ] Centralized design tokens
+- [x] Repository pattern for data access
+- [x] Service layer for financial calculations
+- [x] Centralized design tokens
 - [ ] Validation schemas (zod)
 - [ ] Error boundaries
 
 ### Phase 2 — Core Ledger (Week 2-3)
-- [ ] Account management (create, edit, archive, delete with warnings)
-- [ ] Transaction system (expense, income, transfer, adjustment)
-- [ ] Quick transaction entry with progressive disclosure
-- [ ] Categories with defaults and custom creation
-- [ ] Transfers between accounts
-- [ ] Dashboard with Apple-inspired design
+- [x] Account management foundation (create and local balance tracking)
+- [x] Transaction system (expense, income, transfer, adjustment)
+- [x] Quick transaction entry with progressive disclosure
+- [x] Default categories and category-aware transaction entry
+- [x] Transfers between accounts with atomic balance updates
+- [x] Dashboard with Apple-inspired design
 
 ### Phase 3 — Financial Management (Week 3-4)
 - [ ] Category budgets and overall budgets
-- [ ] Savings goals with progress visualization
+- [x] Savings goals with progress visualization
 - [ ] Bills tracking with reminders
 - [ ] Recurring transactions (local scheduling)
 - [ ] Debt/lending tracking
 
 ### Phase 4 — Analytics (Week 4-5)
-- [ ] Spending analysis (category, account, monthly/daily trends)
+- [x] Offline spending analysis and rule-based insights
 - [ ] Cash flow visualization
 - [ ] Net worth calculation and historical graph
 - [ ] Period comparisons (month vs month, year vs year)
