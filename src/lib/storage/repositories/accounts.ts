@@ -1,27 +1,26 @@
 // Khata - Account Repository
 // Data access layer for accounts
 
-import { 
-  Account, 
-  EntityId, 
-  MinorUnits, 
-  ISODateString,
-  AccountType,
-  nowISO,
-  generateId,
-} from '@/types';
-import { 
-  createEntity, 
-  updateEntity, 
-  softDeleteEntity, 
-  hardDeleteEntity,
-  getEntity,
+import {
+  createEntity,
   getAllEntities,
-  runTransaction,
+  getEntity,
+  hardDeleteEntity,
   queryFirst,
-} from './database';
+  runTransaction,
+  softDeleteEntity,
+  updateEntity,
+} from "@/lib/storage/database";
+import {
+  Account,
+  AccountType,
+  EntityId,
+  ISODateString,
+  MinorUnits,
+  nowISO
+} from "@/types";
 
-const TABLE = 'accounts';
+const TABLE = "accounts";
 const MAPPER = (row: any): Account => ({
   id: row.id,
   name: row.name,
@@ -65,22 +64,29 @@ export async function getAccount(id: EntityId): Promise<Account | null> {
   return getEntity<Account>(TABLE, id, MAPPER);
 }
 
-export async function getAllAccounts(includeArchived = false): Promise<Account[]> {
-  const whereClause = includeArchived ? '' : 'is_archived = 0';
+export async function getAllAccounts(
+  includeArchived = false,
+): Promise<Account[]> {
+  const whereClause = includeArchived ? "" : "is_archived = 0";
   return getAllEntities<Account>(TABLE, MAPPER, whereClause);
 }
 
 export async function getActiveAccounts(): Promise<Account[]> {
-  return getAllEntities<Account>(TABLE, MAPPER, 'is_archived = 0');
+  return getAllEntities<Account>(TABLE, MAPPER, "is_archived = 0");
 }
 
 export async function getAccountsByType(type: AccountType): Promise<Account[]> {
-  return getAllEntities<Account>(TABLE, MAPPER, 'type = ? AND is_archived = 0', [type]);
+  return getAllEntities<Account>(
+    TABLE,
+    MAPPER,
+    "type = ? AND is_archived = 0",
+    [type],
+  );
 }
 
 export async function updateAccount(
   id: EntityId,
-  updates: Partial<Omit<Account, 'id' | 'createdAt' | 'updatedAt'>>
+  updates: Partial<Omit<Account, "id" | "createdAt" | "updatedAt">>,
 ): Promise<void> {
   await updateEntity(TABLE, id, updates);
 }
@@ -93,7 +99,10 @@ export async function unarchiveAccount(id: EntityId): Promise<void> {
   await updateEntity(TABLE, id, { isArchived: false });
 }
 
-export async function deleteAccount(id: EntityId, force = false): Promise<void> {
+export async function deleteAccount(
+  id: EntityId,
+  force = false,
+): Promise<void> {
   if (force) {
     await hardDeleteEntity(TABLE, id);
   } else {
@@ -101,40 +110,52 @@ export async function deleteAccount(id: EntityId, force = false): Promise<void> 
   }
 }
 
-export async function updateAccountBalance(id: EntityId, newBalance: MinorUnits): Promise<void> {
+export async function updateAccountBalance(
+  id: EntityId,
+  newBalance: MinorUnits,
+): Promise<void> {
   await updateEntity(TABLE, id, { currentBalance: newBalance });
 }
 
-export async function adjustAccountBalance(id: EntityId, delta: MinorUnits): Promise<void> {
+export async function adjustAccountBalance(
+  id: EntityId,
+  delta: MinorUnits,
+): Promise<void> {
   const account = await getAccount(id);
-  if (!account) throw new Error('Account not found');
-  await updateEntity(TABLE, id, { currentBalance: account.currentBalance + delta });
+  if (!account) throw new Error("Account not found");
+  await updateEntity(TABLE, id, {
+    currentBalance: account.currentBalance + delta,
+  });
 }
 
 export async function reorderAccounts(accountIds: EntityId[]): Promise<void> {
   await runTransaction(async (tx) => {
     for (let i = 0; i < accountIds.length; i++) {
       await tx.runAsync(
-        'UPDATE accounts SET sort_order = ?, updated_at = ? WHERE id = ?',
-        [i, nowISO(), accountIds[i]]
+        "UPDATE accounts SET sort_order = ?, updated_at = ? WHERE id = ?",
+        [i, nowISO(), accountIds[i]],
       );
     }
   });
 }
 
-export async function getTotalBalance(currency: string = 'INR'): Promise<MinorUnits> {
+export async function getTotalBalance(
+  currency: string = "INR",
+): Promise<MinorUnits> {
   const result = await queryFirst<{ total: number }>(
-    'SELECT COALESCE(SUM(current_balance), 0) as total FROM accounts WHERE currency = ? AND is_archived = 0 AND deleted_at IS NULL',
-    [currency]
+    "SELECT COALESCE(SUM(current_balance), 0) as total FROM accounts WHERE currency = ? AND is_archived = 0 AND deleted_at IS NULL",
+    [currency],
   );
   return (result?.total ?? 0) as MinorUnits;
 }
 
-export async function getTotalBalanceByType(): Promise<Record<AccountType, MinorUnits>> {
+export async function getTotalBalanceByType(): Promise<
+  Record<AccountType, MinorUnits>
+> {
   const rows = await queryFirst<{ type: AccountType; total: number }[]>(
-    'SELECT type, COALESCE(SUM(current_balance), 0) as total FROM accounts WHERE is_archived = 0 AND deleted_at IS NULL GROUP BY type'
+    "SELECT type, COALESCE(SUM(current_balance), 0) as total FROM accounts WHERE is_archived = 0 AND deleted_at IS NULL GROUP BY type",
   );
-  
+
   const result: Record<AccountType, MinorUnits> = {
     bank: 0,
     cash: 0,
@@ -147,47 +168,51 @@ export async function getTotalBalanceByType(): Promise<Record<AccountType, Minor
     fixed_deposit: 0,
     custom: 0,
   } as Record<AccountType, MinorUnits>;
-  
+
   for (const row of rows) {
     result[row.type] = row.total as MinorUnits;
   }
-  
+
   return result;
 }
 
 export async function getNextSortOrder(): Promise<number> {
   const result = await queryFirst<{ max: number }>(
-    'SELECT COALESCE(MAX(sort_order), -1) as max FROM accounts'
+    "SELECT COALESCE(MAX(sort_order), -1) as max FROM accounts",
   );
   return (result?.max ?? -1) + 1;
 }
 
 export async function getAccountCount(): Promise<number> {
   const result = await queryFirst<{ count: number }>(
-    'SELECT COUNT(*) as count FROM accounts WHERE deleted_at IS NULL'
+    "SELECT COUNT(*) as count FROM accounts WHERE deleted_at IS NULL",
   );
   return result?.count ?? 0;
 }
 
 export async function getActiveAccountCount(): Promise<number> {
   const result = await queryFirst<{ count: number }>(
-    'SELECT COUNT(*) as count FROM accounts WHERE is_archived = 0 AND deleted_at IS NULL'
+    "SELECT COUNT(*) as count FROM accounts WHERE is_archived = 0 AND deleted_at IS NULL",
   );
   return result?.count ?? 0;
 }
 
 export async function searchAccounts(query: string): Promise<Account[]> {
   return getAllEntities<Account>(
-    TABLE, 
-    MAPPER, 
-    '(name LIKE ? OR notes LIKE ?) AND deleted_at IS NULL',
-    [`%${query}%`, `%${query}%`]
+    TABLE,
+    MAPPER,
+    "(name LIKE ? OR notes LIKE ?) AND deleted_at IS NULL",
+    [`%${query}%`, `%${query}%`],
   );
 }
 
 // Account with transaction counts (for dashboard)
-export async function getAccountsWithStats(): Promise<Array<Account & { transactionCount: number; lastTransactionDate?: ISODateString }>> {
-  const db = await (await import('./database')).getDatabase();
+export async function getAccountsWithStats(): Promise<
+  Array<
+    Account & { transactionCount: number; lastTransactionDate?: ISODateString }
+  >
+> {
+  const db = await (await import("@/lib/storage/database")).getDatabase();
   const rows = await db.getAllAsync(`
     SELECT 
       a.*,
@@ -206,8 +231,8 @@ export async function getAccountsWithStats(): Promise<Array<Account & { transact
     WHERE a.deleted_at IS NULL
     ORDER BY a.sort_order
   `);
-  
-  return rows.map(row => ({
+
+  return rows.map((row) => ({
     ...MAPPER(row),
     transactionCount: row.transaction_count,
     lastTransactionDate: row.last_txn_date,
