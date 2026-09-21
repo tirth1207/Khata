@@ -16,23 +16,23 @@ export default function AppTabs() {
   >
     <NativeTabs.Trigger name="index" contentStyle={{backgroundColor:LIGHT.background}}>
       <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
-      <NativeTabs.Trigger.Icon sf={{default:'house.fill',selected:'house.fill'}} />
+      <NativeTabs.Trigger.Icon sf="house.fill" md="home" />
     </NativeTabs.Trigger>
     <NativeTabs.Trigger name="transactions" contentStyle={{backgroundColor:LIGHT.background}}>
       <NativeTabs.Trigger.Label>Transactions</NativeTabs.Trigger.Label>
-      <NativeTabs.Trigger.Icon sf={{default:'list.bullet',selected:'list.bullet'}} />
+      <NativeTabs.Trigger.Icon sf="list.bullet" md="list" />
     </NativeTabs.Trigger>
     <NativeTabs.Trigger name="insights" contentStyle={{backgroundColor:LIGHT.background}}>
       <NativeTabs.Trigger.Label>Insights</NativeTabs.Trigger.Label>
-      <NativeTabs.Trigger.Icon sf={{default:'chart.bar.fill',selected:'chart.bar.fill'}} />
+      <NativeTabs.Trigger.Icon sf="chart.bar.fill" md="bar_chart" />
     </NativeTabs.Trigger>
     <NativeTabs.Trigger name="goals" contentStyle={{backgroundColor:LIGHT.background}}>
       <NativeTabs.Trigger.Label>Goals</NativeTabs.Trigger.Label>
-      <NativeTabs.Trigger.Icon sf={{default:'target',selected:'target'}} />
+      <NativeTabs.Trigger.Icon sf="target" md="track_changes" />
     </NativeTabs.Trigger>
     <NativeTabs.Trigger name="more" contentStyle={{backgroundColor:LIGHT.background}}>
       <NativeTabs.Trigger.Label>More</NativeTabs.Trigger.Label>
-      <NativeTabs.Trigger.Icon sf={{default:'ellipsis.circle.fill',selected:'ellipsis.circle.fill'}} />
+      <NativeTabs.Trigger.Icon sf="ellipsis.circle.fill" md="more_horiz" />
     </NativeTabs.Trigger>
   </NativeTabs>;
 }
