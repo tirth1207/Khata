@@ -1,5 +1,5 @@
 /**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
+ * Below are the colors used by the app. Khata is light-only.
  * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
  */
 
@@ -16,11 +16,11 @@ export const Colors = {
     textSecondary: '#60646C',
   },
   dark: {
-    text: '#ffffff',
-    background: '#0B0B0D',
-    backgroundElement: '#151518',
-    backgroundSelected: '#2A2A2F',
-    textSecondary: '#B0B4BA',
+    text: '#000000',
+    background: '#F6F6F8',
+    backgroundElement: '#FFFFFF',
+    backgroundSelected: '#E4E4E8',
+    textSecondary: '#60646C',
   },
 } as const;
 
