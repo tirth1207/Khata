@@ -605,7 +605,11 @@ export async function getLatestBackupMetadata(): Promise<BackupMetadata | null> 
 // Transaction for batch operations
 export async function runTransaction<T>(callback: (tx: SQLite.SQLiteDatabase) => Promise<T>): Promise<T> {
   const db = await getDatabase();
-  return db.withTransactionAsync(callback);
+  let result!: T;
+  await db.withExclusiveTransactionAsync(async (tx) => {
+    result = await callback(tx as unknown as SQLite.SQLiteDatabase);
+  });
+  return result;
 }
 
 // Raw query for analytics
