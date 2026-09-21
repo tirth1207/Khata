@@ -710,7 +710,7 @@ export async function restoreFromBackup(filePath: string, password: string): Pro
   const db = await getDatabase();
   
   // Clear existing data (in a transaction)
-  await db.withTransactionAsync(async (tx) => {
+  await db.withExclusiveTransactionAsync(async (tx) => {
     // Delete all data
     const tables = [
       'transactions', 'accounts', 'categories', 'budgets', 'savings_goals', 'goal_contributions',
