@@ -421,7 +421,7 @@ export const DEFAULT_CATEGORIES = [
 
 // Default Settings
 export const DEFAULT_SETTINGS: Omit<AppSettings, 'id' | 'updated_at'> = {
-  theme: 'system',
+  theme: 'light',
   defaultCurrency: 'INR',
   enabledCurrencies: ['INR'],
   pinHash: undefined,
@@ -455,23 +455,18 @@ export const MIGRATIONS: Array<{ version: number; up: string }> = [
 
 // Helper to run migrations
 export async function runMigrations(db: any): Promise<void> {
-  // Get current schema version
-  const result = await db.getFirstAsync<{ schema_version: number }>(
-    'SELECT schema_version FROM settings WHERE id = ?', ['default']
-  );
-  
-  const currentVersion = result?.schema_version ?? 0;
-  
+  // The settings table is created by migration 1, so never query it
+  // before migrations have had a chance to create it. SQLite's
+  // user_version pragma is the reliable source for migration state.
+  const result = await db.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
+  let currentVersion = result?.user_version ?? 0;
+
   for (const migration of MIGRATIONS) {
     if (migration.version > currentVersion) {
       console.log(`Running migration to version ${migration.version}`);
       await db.execAsync(migration.up);
-      
-      // Update schema version
-      await db.runAsync(
-        'UPDATE settings SET schema_version = ?, updated_at = ? WHERE id = ?',
-        [migration.version, nowISO(), 'default']
-      );
+      currentVersion = migration.version;
+      await db.execAsync(`PRAGMA user_version = ${currentVersion}`);
     }
   }
 }
