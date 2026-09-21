@@ -1,3 +1,4 @@
+import * as Crypto from 'expo-crypto';
 // Khata - Core Type Definitions
 // Financial types using integer minor units for precision
 
@@ -116,7 +117,7 @@ export function formatMoneySigned(
 export type EntityId = string & { readonly __brand: unique symbol };
 
 export function generateId(): EntityId {
-  return crypto.randomUUID() as EntityId;
+  return Crypto.randomUUID() as EntityId;
 }
 
 export function isValidId(id: string): id is EntityId {
