@@ -1,11 +1,12 @@
 import React, { useMemo } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { useKhata } from '@/context/KhataContext';
-import { Card, Loading, SectionTitle, palette, styles as ui } from '@/components/khata-ui';
+import { Card, Loading, SectionTitle, useKhataTheme } from '@/components/khata-ui';
 import { formatMoney, type MinorUnits } from '@/types';
 
 export default function InsightsScreen(){
   const {ready,transactions,categories,budgets,settings}=useKhata();
+  const { palette, styles: ui } = useKhataTheme();
   const currency=settings?.defaultCurrency||'INR'; const now=new Date();
   const start=new Date(now.getFullYear(),now.getMonth(),1).toISOString();
   const prevStart=new Date(now.getFullYear(),now.getMonth()-1,1).toISOString();
