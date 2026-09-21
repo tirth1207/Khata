@@ -332,22 +332,19 @@ export async function createTransfer(data: {
 }): Promise<{ outflow: Transaction; inflow: Transaction }> {
   return runTransaction(async (tx) => {
     const now = nowISO();
-    const transferId = generateId();
-    
-    // Outflow transaction
     await tx.runAsync(
       `INSERT INTO transactions (id, type, amount, currency, account_id, to_account_id, note, date, created_at, updated_at)
        VALUES (?, 'transfer', ?, ?, ?, ?, ?, ?, ?, ?)`,
       [generateId(), data.amount, data.currency, data.fromAccountId, data.toAccountId, data.note, data.date, now, now]
     );
-    
-    // Inflow transaction (adjustment type for the receiving account)
     await tx.runAsync(
       `INSERT INTO transactions (id, type, amount, currency, account_id, to_account_id, note, date, created_at, updated_at)
        VALUES (?, 'adjustment', ?, ?, ?, ?, ?, ?, ?, ?)`,
       [generateId(), data.amount, data.currency, data.toAccountId, data.fromAccountId, data.note, data.date, now, now]
     );
-    
+    await tx.runAsync('UPDATE accounts SET current_balance = current_balance - ?, updated_at = ? WHERE id = ?', [data.amount, now, data.fromAccountId]);
+    await tx.runAsync('UPDATE accounts SET current_balance = current_balance + ?, updated_at = ? WHERE id = ?', [data.amount, now, data.toAccountId]);
+
     // Get both transactions
     const outflow = await tx.getFirstAsync(`SELECT * FROM transactions WHERE account_id = ? AND to_account_id = ? AND date = ? AND type = 'transfer' ORDER BY created_at DESC LIMIT 1`, [data.fromAccountId, data.toAccountId, data.date]);
     const inflow = await tx.getFirstAsync(`SELECT * FROM transactions WHERE account_id = ? AND to_account_id = ? AND date = ? AND type = 'adjustment' ORDER BY created_at DESC LIMIT 1`, [data.toAccountId, data.fromAccountId, data.date]);
