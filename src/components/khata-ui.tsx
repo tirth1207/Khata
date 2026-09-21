@@ -1,5 +1,6 @@
 import React from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, useColorScheme, View, type TextInputProps, type ViewStyle } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export type KhataPalette = {
   bg:string; surface:string; surfaceElevated:string; text:string; muted:string; border:string;
@@ -23,10 +24,10 @@ const DARK: KhataPalette = {
 
 export const palette = LIGHT;
 
-function buildStyles(p: KhataPalette) {
+function buildStyles(p: KhataPalette, topInset = 0, bottomInset = 0) {
   return StyleSheet.create({
     screen:{flex:1,backgroundColor:p.bg},
-    content:{paddingHorizontal:20,paddingTop:18,paddingBottom:136,maxWidth:900,width:'100%',alignSelf:'center'},
+    content:{paddingHorizontal:20,paddingTop:topInset+18,paddingBottom:bottomInset+110,maxWidth:900,width:'100%',alignSelf:'center'},
     eyebrow:{color:p.muted,fontSize:12,fontWeight:'700',letterSpacing:.5},
     title:{color:p.text,fontSize:30,lineHeight:36,fontWeight:'700',letterSpacing:-.7},
     subtitle:{color:p.muted,fontSize:15,lineHeight:21,marginTop:5},
@@ -57,8 +58,9 @@ function buildStyles(p: KhataPalette) {
 
 export function useKhataTheme() {
   const scheme = useColorScheme();
+  const insets = useSafeAreaInsets();
   const colors = scheme === 'dark' ? DARK : LIGHT;
-  return { palette:colors, styles:buildStyles(colors), isDark:scheme === 'dark' };
+  return { palette:colors, styles:buildStyles(colors, insets.top, insets.bottom), isDark:scheme === 'dark' };
 }
 
 export function Card({children,style}:{children:React.ReactNode;style?:ViewStyle}) {
