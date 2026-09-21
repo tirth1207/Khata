@@ -1,3 +1,4 @@
+import * as Crypto from 'expo-crypto';
 // Khata - AI Service
 // Local AI context preparation and Gemini integration
 
@@ -282,7 +283,7 @@ const CONVERSATIONS_TABLE = 'ai_conversations';
 export async function createAIConversation(title: string): Promise<AIConversation> {
   const db = await (await import('../storage/database')).getDatabase();
   const now = new Date().toISOString() as ISODateString;
-  const id = crypto.randomUUID() as EntityId;
+  const id = Crypto.randomUUID() as EntityId;
   
   await db.runAsync(
     `INSERT INTO ai_conversations (id, title, messages, created_at, updated_at)
@@ -365,7 +366,7 @@ export async function deleteAIConversation(id: EntityId): Promise<void> {
 export async function saveAIInsight(insight: Omit<AIInsight, 'id' | 'createdAt' | 'deletedAt'>): Promise<AIInsight> {
   const db = await (await import('../storage/database')).getDatabase();
   const now = new Date().toISOString() as ISODateString;
-  const id = crypto.randomUUID() as EntityId;
+  const id = Crypto.randomUUID() as EntityId;
   
   await db.runAsync(
     `INSERT INTO ai_insights (id, type, title, description, severity, related_entity_ids, is_read, is_dismissed, created_at)
@@ -445,7 +446,7 @@ export async function askAI(
   
   // Add user message
   const userMessage: AIMessage = {
-    id: crypto.randomUUID() as EntityId,
+    id: Crypto.randomUUID() as EntityId,
     role: 'user',
     content: question,
     timestamp: new Date().toISOString() as ISODateString,
@@ -458,7 +459,7 @@ export async function askAI(
   
   // Add assistant message
   const assistantMessage: AIMessage = {
-    id: crypto.randomUUID() as EntityId,
+    id: Crypto.randomUUID() as EntityId,
     role: 'assistant',
     content: response,
     timestamp: new Date().toISOString() as ISODateString,
