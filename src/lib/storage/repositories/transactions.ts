@@ -129,11 +129,32 @@ export async function updateTransaction(
 }
 
 export async function deleteTransaction(id: EntityId, force = false): Promise<void> {
-  if (force) {
-    await hardDeleteEntity(TABLE, id);
-  } else {
-    await softDeleteEntity(TABLE, id);
-  }
+  return runTransaction(async (tx) => {
+    const row = await tx.getFirstAsync<any>('SELECT * FROM transactions WHERE id = ? AND deleted_at IS NULL', [id]);
+    if (!row) return;
+    const now = nowISO();
+    const related = row.to_account_id
+      ? await tx.getFirstAsync<any>(
+          'SELECT * FROM transactions WHERE account_id = ? AND to_account_id = ? AND date = ? AND deleted_at IS NULL ORDER BY created_at DESC LIMIT 1',
+          [row.to_account_id, row.account_id, row.date]
+        )
+      : null;
+    if (force) {
+      await tx.runAsync('DELETE FROM transactions WHERE id = ?', [id]);
+      if (related) await tx.runAsync('DELETE FROM transactions WHERE id = ?', [related.id]);
+    } else {
+      await tx.runAsync('UPDATE transactions SET deleted_at = ?, updated_at = ? WHERE id = ?', [now, now, id]);
+      if (related) await tx.runAsync('UPDATE transactions SET deleted_at = ?, updated_at = ? WHERE id = ?', [now, now, related.id]);
+    }
+    if (row.type === 'income' || row.type === 'adjustment') {
+      await tx.runAsync('UPDATE accounts SET current_balance = current_balance - ?, updated_at = ? WHERE id = ?', [row.amount, now, row.account_id]);
+    } else if (row.type === 'expense') {
+      await tx.runAsync('UPDATE accounts SET current_balance = current_balance + ?, updated_at = ? WHERE id = ?', [row.amount, now, row.account_id]);
+    } else if (row.type === 'transfer') {
+      await tx.runAsync('UPDATE accounts SET current_balance = current_balance + ?, updated_at = ? WHERE id = ?', [row.amount, now, row.account_id]);
+      if (row.to_account_id) await tx.runAsync('UPDATE accounts SET current_balance = current_balance - ?, updated_at = ? WHERE id = ?', [row.amount, now, row.to_account_id]);
+    }
+  });
 }
 
 export async function getTransactionCount(): Promise<number> {
