@@ -17,4 +17,4 @@ export default function GoalsScreen(){
   </View>;
 }
 const s=StyleSheet.create({name:{fontSize:17,fontWeight:'700'}});
-const m=StyleSheet.create({backdrop:{flex:1,backgroundColor:'rgba(0,0,0,.48)',justifyContent:'flex-end'},sheet:{borderTopLeftRadius:28,borderTopRightRadius:28,padding:22,paddingBottom:38}});,borderTopLeftRadius:28,borderTopRightRadius:28,padding:22,paddingBottom:38}});
+const m=StyleSheet.create({backdrop:{flex:1,backgroundColor:'rgba(0,0,0,.48)',justifyContent:'flex-end'},sheet:{borderTopLeftRadius:28,borderTopRightRadius:28,padding:22,paddingBottom:38}});
