@@ -1,11 +1,12 @@
 import React, { useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useKhata } from '@/context/KhataContext';
-import { Button, Field, palette, styles as ui } from './khata-ui';
+import { Button, Field, useKhataTheme } from './khata-ui';
 import { toMinorUnits, type EntityId, type TransactionType } from '@/types';
 
 export function TransactionSheet({visible,onClose}:{visible:boolean;onClose:()=>void}) {
   const {accounts,categories,addTransaction,addTransfer,settings}=useKhata();
+  const { palette, styles: ui } = useKhataTheme();
   const [type,setType]=useState<TransactionType>('expense'),[amount,setAmount]=useState(''),[accountId,setAccountId]=useState<EntityId|''>(''),[toAccountId,setToAccountId]=useState<EntityId|''>(''),[categoryId,setCategoryId]=useState<EntityId|''>(''),[note,setNote]=useState(''),[saving,setSaving]=useState(false);
   const cats=useMemo(()=>categories.filter(c=>!c.parentId&&(c.type===type||c.type==='both')),[categories,type]);
   const reset=()=>{setAmount('');setAccountId('');setToAccountId('');setCategoryId('');setNote('');setType('expense');};
@@ -18,4 +19,4 @@ export function TransactionSheet({visible,onClose}:{visible:boolean;onClose:()=>
     <Field label="Note (optional)" placeholder="Dinner, salary, fuel…" value={note} onChangeText={setNote}/><Button title={saving?'Saving…':'Save transaction'} onPress={submit} disabled={saving||!amount||!accountId||(type==='transfer'&&!toAccountId)}/>
   </ScrollView></View></View></Modal>;
 }
-const s=StyleSheet.create({backdrop:{flex:1,backgroundColor:'rgba(0,0,0,.38)',justifyContent:'flex-end'},sheet:{maxHeight:'92%',backgroundColor:'#FFF',borderTopLeftRadius:28,borderTopRightRadius:28},handle:{width:42,height:5,borderRadius:3,backgroundColor:'#D4D4D8',alignSelf:'center',marginTop:9},content:{padding:20,paddingBottom:36},segment:{flexDirection:'row',backgroundColor:'#F0F0F3',padding:4,borderRadius:14,marginVertical:18},segmentItem:{flex:1,paddingVertical:11,alignItems:'center',borderRadius:11},selected:{backgroundColor:'#FFF',shadowColor:'#000',shadowOpacity:.08,shadowRadius:5,elevation:2},segmentText:{fontSize:13,fontWeight:'600',color:palette.muted},selectedText:{color:palette.text},chips:{gap:8,paddingVertical:9},chip:{paddingHorizontal:13,paddingVertical:10,borderRadius:14,backgroundColor:'#F4F4F6',borderWidth:1,borderColor:'#F4F4F6'},chipSelected:{backgroundColor:'#111113',borderColor:'#111113'},chipText:{fontSize:13,color:palette.muted,fontWeight:'600'},chipTextSelected:{color:'#FFF'}});
+const s=StyleSheet.create({backdrop:{flex:1,backgroundColor:'rgba(0,0,0,.38)',justifyContent:'flex-end'},sheet:{maxHeight:'92%',backgroundColor:palette.surface,borderTopLeftRadius:28,borderTopRightRadius:28},handle:{width:42,height:5,borderRadius:3,backgroundColor:'#D4D4D8',alignSelf:'center',marginTop:9},content:{padding:20,paddingBottom:36},segment:{flexDirection:'row',backgroundColor:palette.surfaceElevated,padding:4,borderRadius:14,marginVertical:18},segmentItem:{flex:1,paddingVertical:11,alignItems:'center',borderRadius:11},selected:{backgroundColor:palette.surface,shadowColor:'#000',shadowOpacity:.08,shadowRadius:5,elevation:2},segmentText:{fontSize:13,fontWeight:'600'},selectedText:{color:palette.text},chips:{gap:8,paddingVertical:9},chip:{paddingHorizontal:13,paddingVertical:10,borderRadius:14,backgroundColor:palette.surfaceElevated,borderWidth:1,borderColor:palette.border},chipSelected:{backgroundColor:palette.primary,borderColor:palette.primary},chipText:{fontSize:13,fontWeight:'600'},chipTextSelected:{color:palette.primaryText}});
