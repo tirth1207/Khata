@@ -53,11 +53,20 @@ export async function createTransaction(data: {
   receiptPath?: string;
   date: ISODateString;
 }): Promise<Transaction> {
-  const now = nowISO();
-  return createEntity<Transaction>(TABLE, {
-    ...data,
-    createdAt: now,
-    updatedAt: now,
+  return runTransaction(async (tx) => {
+    const now = nowISO();
+    const id = generateId();
+    await tx.runAsync(
+      `INSERT INTO transactions (id, type, amount, currency, account_id, to_account_id, category_id, note, receipt_path, date, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [id, data.type, data.amount, data.currency, data.accountId, data.toAccountId, data.categoryId, data.note, data.receiptPath, data.date, now, now]
+    );
+    const delta = data.type === 'income' || data.type === 'adjustment' ? data.amount : data.type === 'expense' ? -data.amount : 0;
+    if (delta !== 0) {
+      await tx.runAsync('UPDATE accounts SET current_balance = current_balance + ?, updated_at = ? WHERE id = ?', [delta, now, data.accountId]);
+    }
+    const row = await tx.getFirstAsync('SELECT * FROM transactions WHERE id = ?', [id]);
+    return MAPPER(row);
   });
 }
 
