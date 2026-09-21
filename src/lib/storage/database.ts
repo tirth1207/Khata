@@ -1,3 +1,4 @@
+import * as Crypto from 'expo-crypto';
 // Khata - Database Service
 // Wrapper around expo-sqlite with type-safe operations
 
@@ -353,7 +354,7 @@ export async function createEntity<T extends { id: EntityId; createdAt: ISODateS
   entity: Omit<T, 'id' | 'createdAt' | 'updatedAt'> & { id?: EntityId }
 ): Promise<T> {
   const db = await getDatabase();
-  const id = entity.id || crypto.randomUUID() as EntityId;
+  const id = entity.id || Crypto.randomUUID() as EntityId;
   const now = new Date().toISOString() as ISODateString;
   
   const columns = ['id', 'created_at', 'updated_at', ...Object.keys(entity).filter(k => k !== 'id')];
@@ -573,7 +574,7 @@ export async function saveBackupMetadata(metadata: BackupMetadata): Promise<void
     `INSERT INTO backup_metadata (id, version, exported_at, app_version, entity_counts, checksum, created_at)
      VALUES (?, ?, ?, ?, ?, ?, ?)`,
     [
-      crypto.randomUUID(),
+      Crypto.randomUUID(),
       metadata.version,
       metadata.exportedAt,
       metadata.appVersion,
